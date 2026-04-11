@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "telegram": {
+      "command": "python3",
+      "args": ["path/to/your/tg_mcp_server.py"],
+      "env": {
+        "TELEGRAM_BOT_TOKEN": "your_bot_token_here"
+      }
+    }
+  }
+}

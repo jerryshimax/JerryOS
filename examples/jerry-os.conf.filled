@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Example filled-in config for a crypto trader
+
+USER_NAME="Alex Chen"
+USER_ROLE="crypto trader and DeFi researcher"
+USER_BIO="I'm Alex Chen, a full-time crypto trader and DeFi researcher.
+I trade across CEXs and DEXs, research protocols and yield strategies,
+and maintain a network of OTC desks, protocols, and fellow traders."
+
+BRAIN_PATH="$HOME/Brain"
+WORK_PATH="$HOME/Work"
+SHIP_PATH="$HOME/Ship"
+
+ENTITIES=(
+  "AT:Alpha Trading:Main trading operation across CEXs and DEXs"
+  "DR:DeFi Research:Deep research into protocols, yield strategies, and emerging chains"
+)
+
+ENABLE_MCP_MEMORY=true
+ENABLE_MCP_GOOGLE_TASKS=true
+ENABLE_ARENA=true
+ENABLE_CLOUD_BOT=true
+ENABLE_SKILL_ENGINE=false
+ENABLE_LOG_ROTATE=true

@@ -1,0 +1,85 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash",
+      "Agent",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(**/.vault/**)",
+      "Edit(**/.vault/**)",
+      "Write(**/.vault/**)",
+      "Edit(**/.claude/hooks/**)",
+      "Write(**/.claude/hooks/**)",
+      "Edit(**/.claude/settings.json)",
+      "Write(**/.claude/settings.json)",
+      "Edit(**/.claude/settings.local.json)",
+      "Write(**/.claude/settings.local.json)",
+
+      "Read(**/.solana/**)",
+      "Read(**/.ethereum/**)",
+      "Read(**/.bitcoin/**)",
+      "Read(**/.keys/**)",
+      "Read(**/keystore/**)",
+      "Read(**/*.key)",
+      "Read(**/*seed*)",
+      "Read(**/*mnemonic*)",
+      "Read(**/*private*key*)",
+      "Glob(**/.solana/**)",
+      "Glob(**/.ethereum/**)",
+      "Glob(**/.bitcoin/**)",
+      "Grep(**/.solana/**)",
+      "Grep(**/.ethereum/**)",
+      "Grep(**/.bitcoin/**)",
+
+      "Bash(rm -rf *)",
+      "Bash(rm -r *)",
+      "Bash(rm --recursive *)",
+      "Bash(sudo *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(chmod 777 *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__HOME__/.claude/hooks/safety-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__HOME__/.claude/hooks/backup-before-edit.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__HOME__/.claude/hooks/brain-guard.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

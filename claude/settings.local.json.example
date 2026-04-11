@@ -1,0 +1,22 @@
+{
+  "_comment": "Copy this to ~/.claude/settings.local.json and fill in your values",
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "mcpServers": {
+    "memory": {
+      "command": "node",
+      "args": ["__SHIP_PATH__/mcp-memory/dist/index.js"],
+      "env": {}
+    },
+    "google-tasks": {
+      "command": "node",
+      "args": ["__SHIP_PATH__/mcp-google-tasks/dist/index.js"],
+      "env": {
+        "GOOGLE_CLIENT_ID": "YOUR_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET": "YOUR_CLIENT_SECRET"
+      }
+    }
+  }
+}

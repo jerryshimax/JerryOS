@@ -1,0 +1,16 @@
+{
+  "dmPolicy": "allowlist",
+  "allowFrom": ["YOUR_CHAT_ID"],
+  "groups": {
+    "-100EXAMPLE_GROUP_ID": {
+      "name": "My Group",
+      "allowed": true,
+      "requireMention": true,
+      "responseMode": "selective",
+      "allowFrom": []
+    }
+  },
+  "pending": {},
+  "mentionPatterns": [],
+  "ackReaction": ""
+}

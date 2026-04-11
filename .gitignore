@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+.next/
+out/
+build/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.key
+*seed*
+*mnemonic*
+*keystore*
+*private*key*
+
+# Crypto wallets — NEVER commit
+.solana/
+.ethereum/
+.bitcoin/
+
+# Auth tokens
+tokens.json
+*tokens*.json
+access.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime
+*.pid
+*.lock
