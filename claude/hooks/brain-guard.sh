@@ -1,27 +1,32 @@
 #!/usr/bin/env bash
+# brain-guard.sh — PostToolUse hook for Brain vault writes
+# Fires after Write|Edit to "$BRAIN/*.md" (root-level files only).
+# Three jobs: validate frontmatter, auto-log to Activity Log, queue index refresh.
+# ALWAYS exits 0 (non-blocking). Warnings emitted via stdout JSON.
+#
+# Configuration:
+#   $BRAIN  — Obsidian Brain vault path (defaults to ~/Work/[00] Brain)
+#   ~/.claude/.entities — newline-separated entity tags (e.g. ENTITY_A) used
+#                          to route index queue updates. Optional.
+
 set -euo pipefail
 
-# brain-guard.sh — PostToolUse hook for Brain vault writes
-# Fires after Write|Edit to Brain vault *.md files
-# Three jobs: validate frontmatter, auto-log to Activity Log, queue index refresh
-# ALWAYS exits 0 (non-blocking). Warnings via stdout JSON.
-
-# Configure these paths for your setup
-BRAIN="${BRAIN_PATH:-$HOME/Brain}"
+BRAIN="${BRAIN:-$HOME/Work/[00] Brain}"
 ACTIVITY_LOG="$BRAIN/Activity Log.md"
 INDEX_QUEUE="$HOME/.claude/.brain-index-queue"
+ENTITIES_FILE="$HOME/.claude/.entities"
 
-# ── Parse stdin ──────────────────────────────────────────
+# ── Parse stdin ──────────────────────────────────────────────
 input=$(cat)
 file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
 tool_name=$(echo "$input" | jq -r '.tool_name // ""')
 
-# ── Gate: only act on root-level Brain .md files ─────────
+# ── Gate: only act on root-level Brain .md files ────────────
 [[ -n "$file_path" ]] || exit 0
 [[ "$file_path" == "$BRAIN/"* ]] || exit 0
 [[ "$file_path" == *.md ]] || exit 0
 
-# Skip subdirectories (Indexes/, Templates/, .obsidian/)
+# Skip subdirectories (Indexes/, Templates/, Claude/, .obsidian/, Clippings/)
 rel="${file_path#$BRAIN/}"
 [[ "$rel" == */* ]] && exit 0
 
@@ -30,7 +35,7 @@ basename=$(basename "$file_path" .md)
 [[ "$basename" == "Activity Log" ]] && exit 0
 [[ "$basename" == "Dashboard" ]] && exit 0
 
-# ── Extract [Type] prefix from filename ──────────────────
+# ── Extract [Type] prefix from filename ──────────────────────
 prefix=$(echo "$basename" | grep -oE '^\[[A-Za-z]+\]' | tr -d '[]' || true)
 [[ -n "$prefix" ]] || exit 0
 
@@ -41,19 +46,23 @@ case "$prefix" in
   People)    canonical="person" ;;
   Memos)     canonical="memo" ;;
   Research)  canonical="research" ;;
+  Medical)   canonical="medical" ;;
+  Wellness)  canonical="wellness" ;;
   Ship)      canonical="ship" ;;
   Events)    canonical="event" ;;
   Decks)     canonical="deck" ;;
   Home)      canonical="home" ;;
   Travel)    canonical="travel" ;;
   Inbox)     canonical="inbox" ;;
+  Datarooms) canonical="dataroom" ;;
   Legal)     canonical="legal" ;;
+  Design)    canonical="design" ;;
   Finance)   canonical="finance" ;;
   Documents) canonical="documents" ;;
   *)         canonical="" ;;
 esac
 
-# ── Job 1: Frontmatter validation ───────────────────────
+# ── Job 1: Frontmatter validation ───────────────────────────
 warnings=()
 
 if [[ -f "$file_path" ]]; then
@@ -81,6 +90,13 @@ if [[ -f "$file_path" ]]; then
       Memos)
         echo "$fm" | grep -q '^entity:' || warnings+=("missing 'entity'")
         ;;
+      Medical)
+        echo "$fm" | grep -q '^person:' || warnings+=("missing 'person'")
+        echo "$fm" | grep -q '^date:' || warnings+=("missing 'date'")
+        ;;
+      Wellness)
+        echo "$fm" | grep -q '^person:' || warnings+=("missing 'person'")
+        ;;
     esac
   fi
 fi
@@ -90,7 +106,7 @@ if [[ ${#warnings[@]} -gt 0 ]]; then
   echo "{\"warning\": \"Brain guard: $basename — $warn_str\"}"
 fi
 
-# ── Job 2: Auto Activity Log ────────────────────────────
+# ── Job 2: Auto Activity Log ─────────────────────────────────
 operation="Updated"
 [[ "$tool_name" == "Write" ]] && operation="Created"
 
@@ -108,21 +124,31 @@ $entry" "$ACTIVITY_LOG"
   fi
 fi
 
-# ── Job 3: Index queue ───────────────────────────────────
-# Extract entity tag from filename: [Type] ENTITY - Description
-entity=$(echo "$basename" | sed -n 's/^\[[A-Za-z]*\] \([A-Z]*\) -.*/\1/p')
+# ── Job 3: Index queue ───────────────────────────────────────
+# Extract entity tag (e.g. "[Meetings] ENTITY_A - Topic.md" → "ENTITY_A")
+entity=$(echo "$basename" | sed -n 's/^\[[A-Za-z]*\] \([A-Za-z_]*\) -.*/\1/p')
 
-if [[ -n "$entity" ]]; then
-  mkdir -p "$(dirname "$INDEX_QUEUE")"
-  echo "$entity" >> "$INDEX_QUEUE"
+index=""
+# Match against configured entities if the file exists
+if [[ -n "$entity" ]] && [[ -f "$ENTITIES_FILE" ]]; then
+  if grep -Fxq "$entity" "$ENTITIES_FILE" 2>/dev/null; then
+    index="$entity"
+  fi
 fi
 
+# Personal/People types route to fixed indexes regardless of entity
 case "$prefix" in
-  People) echo "People" >> "$INDEX_QUEUE" 2>/dev/null ;;
+  Medical|Wellness|Travel|Home) index="Personal" ;;
+  People) index="People" ;;
 esac
 
-# ── Job 4: Duplicate detection ───────────────────────────
-core_desc=$(echo "$basename" | sed 's/^\[[A-Za-z]*\] //' | sed 's/^[A-Z]* - //' | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} //')
+if [[ -n "$index" ]]; then
+  mkdir -p "$(dirname "$INDEX_QUEUE")"
+  echo "$index" >> "$INDEX_QUEUE"
+fi
+
+# ── Job 4: Duplicate detection ───────────────────────────────
+core_desc=$(echo "$basename" | sed 's/^\[[A-Za-z]*\] //' | sed 's/^[A-Za-z_]* - //' | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} //')
 
 if [[ -n "$core_desc" ]] && [[ ${#core_desc} -gt 3 ]]; then
   similar=$(ls "$BRAIN/" 2>/dev/null | grep -i "$core_desc" | grep -v "^$(basename "$file_path")$" || true)

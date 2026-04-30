@@ -1,0 +1,36 @@
+[
+  {
+    "id": "full-health-check",
+    "prompt": "Run a full health check on my system.",
+    "expected_output": "Traffic-light dashboard covering all integrations, MCPs, bots, hooks, LaunchAgents, and cron jobs",
+    "expectations": [
+      "Should check all MCP servers (codex, whoop, google-tasks, memory, etc.)",
+      "Should check Telegram bot connectivity",
+      "Should check LaunchAgents status",
+      "Should check hooks configuration",
+      "Should use traffic-light format (green/yellow/red)"
+    ]
+  },
+  {
+    "id": "specific-mcp-check",
+    "prompt": "Is my Whoop MCP working?",
+    "expected_output": "Targeted health check of Whoop MCP with connection test and token status",
+    "expectations": [
+      "Should check Whoop MCP config in ~/.claude.json",
+      "Should verify OAuth token validity",
+      "Should attempt a test API call",
+      "Should report clear pass/fail"
+    ]
+  },
+  {
+    "id": "telegram-check",
+    "prompt": "Is Cloud online? Check Telegram.",
+    "expected_output": "Telegram bot health check with connectivity status and any errors",
+    "expectations": [
+      "Should check bot token validity",
+      "Should verify plugin is loaded and connected",
+      "Should check recent message delivery",
+      "Should report clear status"
+    ]
+  }
+]

@@ -1,2 +1,0 @@
-# No external dependencies — uses only Python stdlib
-# Python 3.11+ required (for SQLite FTS5 support and type hints)

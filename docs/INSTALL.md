@@ -61,20 +61,20 @@ Open Terminal and run:
 
 ```
 cd ~
-git clone https://github.com/jerryshi/JerryOS.git
+git clone https://github.com/jerryshimax/JerryOS.git
 cd JerryOS
 ```
 
 ### 2.2 Copy the config template
 
 ```
-cp jerry-os.conf.example jerry-os.conf
+cp jerryos.conf.example jerryos.conf
 ```
 
 ### 2.3 Edit your config
 
 ```
-open jerry-os.conf
+open jerryos.conf
 ```
 
 This opens in TextEdit. Fill in your details:
@@ -101,13 +101,15 @@ chmod +x setup.sh && ./setup.sh
 
 The installer will:
 1. Check that all prerequisites are installed
-2. Read your jerry-os.conf
+2. Read your jerryos.conf
 3. Generate your personalized CLAUDE.md
 4. Install safety hooks (protects files + crypto keys)
-5. Install 22 AI skills
-6. Create your Obsidian vault with templates
-7. Build any modules you enabled
-8. Create the backup vault at ~/.vault/
+5. Install 62 skills (symlinked, so `git pull` keeps them current)
+6. Render the 3 autoload rules (gdrive-routing, brain-naming, common-tasks)
+7. Scaffold the agents you listed in `jerryos.conf`
+8. Create your Obsidian vault with templates
+9. Print MCP config snippets (you paste them into `~/.claude.json`)
+10. Create the backup vault at ~/.vault/
 
 Watch for any red X errors. Green checkmarks mean that step succeeded.
 
@@ -117,7 +119,7 @@ Watch for any red X errors. Green checkmarks mean that step succeeded.
 
 1. Open Obsidian
 2. Click **"Open folder as vault"**
-3. Navigate to the path you set in jerry-os.conf (default: `~/Brain`)
+3. Navigate to the path you set in jerryos.conf (default: `~/Brain`)
 4. Click **"Open"**
 5. You'll see your Dashboard, Templates folder, and Activity Log
 6. When prompted about "Community plugins", click **"Trust author and enable plugins"** (Dataview is needed for the Dashboard)
@@ -187,45 +189,51 @@ List my Google Tasks
 
 Each module has its own README with detailed setup instructions.
 
+v2 ships the OS layer only — daemons live in standalone repos. Clone what you want:
+
 ### Cloud Bot (Telegram AI Assistant)
 
-Your own AI assistant on Telegram — message it anytime, anywhere.
+Your own AI on Telegram — message it anytime, anywhere.
 
-**Setup:**
-1. Open Telegram, search for @BotFather
-2. Send `/newbot` and follow the prompts to create a bot
-3. Copy the bot token
-4. `cd ~/JerryOS/cloud-bot`
-5. `cp .env.example .env`
-6. Paste your bot token into `.env`
-7. `cp access.example.json access.json`
-8. Edit `access.json` with your Telegram chat ID
-9. Install Bun if needed: `curl -fsSL https://bun.sh/install | bash`
-10. Run: `bun run bot.ts`
-
-**How to find your chat ID:** Message your bot, then visit `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` — your chat ID is in the response.
-
-### Arena (Multi-AI Analysis)
-
-Run a question through 4 different AI models and get a synthesized answer.
-Great for market analysis — each AI argues a different perspective.
-
-**Setup:** See `modules/arena/README.md`
-**Requires:** API keys for OpenAI, Google AI, and xAI (optional — works with just 2 models)
+```bash
+git clone https://github.com/jerryshimax/cloud-bot.git ~/Ship/cloud-bot
+cd ~/Ship/cloud-bot
+cp .env.example .env  # paste @BotFather token + your chat ID
+bun install && bun run bot.ts
+```
 
 ### Memory MCP (Vault Search)
 
-Full-text search across every markdown file in your vault. Claude can find anything you've written.
+BM25 search across markdown + memory + handoffs.
 
-**Setup:** Already built by `setup.sh` if you enabled it.
-**Test:** Ask Claude "Search my vault for [topic]"
+```bash
+git clone https://github.com/jerryshimax/mcp-memory.git ~/Ship/mcp-memory
+cd ~/Ship/mcp-memory && npm install && npm run build
+```
+
+Then paste the `memory` snippet from `setup.sh` output into `~/.claude.json`.
 
 ### Google Tasks MCP
 
-Manage your to-do list through Claude — create tasks, check them off, set deadlines.
+Manage Google Tasks through Claude.
 
-**Setup:** See `modules/mcp-google-tasks/README.md`
-**Requires:** Google Cloud project + OAuth credentials (15 min setup)
+```bash
+git clone https://github.com/jerryshimax/mcp-google-tasks.git ~/Ship/mcp-google-tasks
+cd ~/Ship/mcp-google-tasks && npm install && npm run build
+```
+
+Requires a Google Cloud OAuth client. See that repo's README.
+
+### Arena (Multi-Model Adversarial Analysis)
+
+Lives inside the `arena` skill — uses external API keys (OpenAI, Google AI, xAI). No separate install.
+
+### Downloads Filer / Mac Bootstrap
+
+```bash
+git clone https://github.com/jerryshimax/downloads-filer.git ~/Ship/downloads-filer
+git clone https://github.com/jerryshimax/mac-bootstrap.git ~/Ship/mac-bootstrap
+```
 
 ---
 
@@ -255,15 +263,7 @@ Claude follows the naming convention automatically.
 
 ### Running a health check
 
-Open Claude and type:
-```
-/doctor
-```
-
-Or run directly:
-```
-~/JerryOS/modules/scripts/doctor.sh
-```
+Inside Claude Code, ask: `Run a JerryOS sanity check — are hooks loaded, skills linked, rules rendered?`
 
 ---
 
@@ -284,18 +284,14 @@ chmod +x setup.sh && ./setup.sh
 
 Check they're installed:
 ```
-ls ~/.claude/hooks/
+ls -la ~/.claude/hooks/
 ```
 
-You should see `safety-gate.sh`, `backup-before-edit.sh`, `brain-guard.sh`.
-If missing, re-run `./setup.sh`.
+You should see 9 symlinks (safety-gate, backup-before-edit, brain-guard, chat-privacy-hook, chat-tracker, claude-session-start, session-export, brain-index-refresh, log-hook-event) plus a `lib/` symlink. If missing, re-run `./setup.sh`.
 
 ### MCP server won't start
 
-Most common issue: not built yet.
-```
-cd modules/mcp-memory && npm install && npm run build
-```
+The MCP repo isn't bundled in v2. Clone it separately, build it, then paste the snippet from `setup.sh` output into `~/.claude.json`. See [MCPS.md](MCPS.md).
 
 ### Obsidian shows "No results" for Dashboard queries
 
@@ -305,4 +301,4 @@ Install the Dataview plugin:
 
 ### Need help?
 
-Open an issue on GitHub: https://github.com/jerryshi/JerryOS/issues
+Open an issue on GitHub: https://github.com/jerryshimax/JerryOS/issues

@@ -1,22 +1,33 @@
 #!/usr/bin/env bash
+# safety-gate.sh — PreToolUse Bash hook
+# Blocks destructive shell commands before they execute.
+# Decision: exit 2 with a JSON block reason; exit 0 otherwise.
+
 set -euo pipefail
 
-# safety-gate.sh — PreToolUse hook for Bash commands
-# Blocks dangerous patterns before they execute.
-# Exit 0 = allow, Exit 2 + JSON = block
-
-cmd=$(jq -r '.tool_input.command // ""' < /dev/stdin)
+INPUT=$(cat /dev/stdin)
+if command -v jq &>/dev/null; then
+  cmd=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
+else
+  cmd=$(echo "$INPUT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("tool_input",{}).get("command",""))')
+fi
 
 # ── Safe-path allowlist (checked BEFORE deny patterns) ──
-# Allow rm of common temp files in Downloads only (no recursive)
+# Allow common Downloads / cloud-storage move + cleanup patterns.
+if echo "$cmd" | grep -Eq 'mv\s+~/Downloads/.*~/Work/'; then
+  exit 0
+fi
 if echo "$cmd" | grep -Eq 'rm\s+(-f\s+)?~/Downloads/.*\.(dmg|pkg|zip|tmp|json|xml|jpg|png|gif)' && \
    ! echo "$cmd" | grep -Eq 'rm\s+-r'; then
   exit 0
 fi
+if echo "$cmd" | grep -Eq 'rm\s+-rf\s+~/Downloads/"?Telegram Desktop"?' && \
+   ! echo "$cmd" | grep -Eq '/\.\.'; then
+  exit 0
+fi
 
-# Block list
 deny_patterns=(
-  # -- Destructive file operations --
+  # ── Destructive file operations ──
   'rm\s+-rf'
   'rm\s+-r\s'
   'rm\s+--recursive'
@@ -25,24 +36,24 @@ deny_patterns=(
   'mv\s+~/'
   'mv\s+~\s'
 
-  # -- Git destructive --
+  # ── Git destructive ──
   'git\s+push\s+(-f|--force)'
   'git\s+reset\s+--hard'
 
-  # -- System commands --
+  # ── System commands ──
   'sudo\s+'
   'chmod\s+777'
   'mkfs\.'
   'dd\s+if='
 
-  # -- Pipe-to-shell (remote code execution) --
+  # ── Pipe-to-shell (RCE) ──
   'curl.*\|\s*bash'
   'curl.*\|\s*sh'
   'wget.*\|\s*bash'
   ':()\{\s*:\|:&'
   'DROP\s+TABLE'
 
-  # -- Exfiltration: block outbound data sends --
+  # ── Exfiltration ──
   'curl\s+.*-X\s*(POST|PUT|DELETE)'
   'curl\s+.*--data'
   'curl\s+.*-d\s'
@@ -57,9 +68,7 @@ deny_patterns=(
   '\bnc\s+'
   '\bncat\s+'
 
-  # -- Transaction: must prompt before these --
-  'git\s+push'
-  'git\s+clone'
+  # ── Transactional installs / launchd surgery (require manual approval) ──
   'pip\s+install'
   'pip3\s+install'
   'brew\s+install'
@@ -70,13 +79,13 @@ deny_patterns=(
   'launchctl\s+unload'
   'launchctl\s+remove'
 
-  # -- Indirect delete/overwrite --
+  # ── Indirect delete ──
   'xargs\s+rm'
   'xargs\s.*\brm\b'
   '\bfind\b.*-delete'
   '\bfind\b.*-exec\s+rm'
 
-  # -- File truncation/overwrite via redirect --
+  # ── File truncation via redirect ──
   '>\s*~/\.'
   '>\s*~/.ssh/'
   '>\s*~/.aws/'
@@ -87,17 +96,19 @@ deny_patterns=(
   '\btee\s+~/.claude/'
   '\btee\s+~/Library/LaunchAgents/'
 
-  # -- Self-protection: don't let Claude disable its own safety --
+  # ── Self-protection ──
   '>\s*.*safety-gate'
   'cat\s.*>\s*.*safety-gate'
   '\brm\b.*safety-gate'
 
-  # -- Vault isolation: Claude cannot touch the isolated backup --
+  # ── Vault isolation ──
   '/\.vault/'
   'vault/brain'
+  'vault/claude-infra'
   'vault/file-backups'
+  'vault/mirror'
 
-  # -- Protect sensitive dotfiles --
+  # ── Dotfile protection ──
   '>\s*~/.zshrc'
   '>\s*~/.bashrc'
   '>\s*~/.bash_profile'
@@ -107,10 +118,10 @@ deny_patterns=(
   '\btee\s+~/.bashrc'
   '\btee\s+~/.gitconfig'
 
-  # -- Block open launching arbitrary apps --
+  # ── Block launching arbitrary apps ──
   'open\s+-a\s'
 
-  # ── Crypto security: seed phrases, private keys, wallet dirs ──
+  # ── Crypto: seed phrases, private keys, wallet dirs ──
   'seed.phrase'
   'mnemonic'
   'private.key'

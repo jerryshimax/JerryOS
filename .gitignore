@@ -43,3 +43,19 @@ Thumbs.db
 # Runtime
 *.pid
 *.lock
+
+# Skills-internal artifacts (leftover .claude permissions bookmarks)
+claude/skills/.claude/
+claude/skills/**/MANIFEST.sha256
+
+# JerryOS-internal scratch
+*.bak
+*.bak.[0-9]*
+*.local
+
+# Personal local state (never ship to LP / public)
+TG_CHATS.md
+.entities
+.chat-rules.json
+.brain-index-queue
+.active-chat

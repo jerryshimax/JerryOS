@@ -6,7 +6,7 @@ user_invocable: true
 
 # Doctor — System Health Check
 
-Run the doctor script to health-check Jerry's full Claude Code setup.
+Run the doctor script to health-check the user's full Claude Code setup.
 
 ## Instructions
 
@@ -38,4 +38,4 @@ bash ~/Ship/tools/doctor.sh
 
 4. End with the summary line from the script output.
 
-5. If Jerry asks to fix something, apply the fix directly when safe (rebuild MCP, load LaunchAgent, etc.). For destructive fixes, confirm first.
+5. If the user asks to fix something, apply the fix directly when safe (rebuild MCP, load LaunchAgent, etc.). For destructive fixes, confirm first.

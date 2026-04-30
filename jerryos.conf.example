@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# jerryos.conf — JerryOS v2 Configuration
+# Copy this file to jerryos.conf and fill in your details.
+# Then run: ./setup.sh
+
+# ─── Your Identity ──────────────────────────────────────
+# Used in CLAUDE.md so Claude knows who you are
+USER_NAME="Your Name"
+USER_ROLE="your role (e.g., investor, operator, builder)"
+USER_BIO="A short paragraph about who you are and what you do.
+Claude reads this to understand your context and tailor its help."
+
+# ─── Paths ──────────────────────────────────────────────
+# Where your Obsidian vault will live
+BRAIN_PATH="$HOME/Brain"
+
+# Where your file system root lives (Google Drive, Dropbox, or local)
+WORK_PATH="$HOME/Work"
+
+# Where code projects live
+SHIP_PATH="$HOME/Ship"
+
+# ─── Entities ───────────────────────────────────────────
+# Organizations or contexts you work across.
+# Format: "TAG:Full Name:Description"
+# TAG = short uppercase identifier used in filenames (e.g., FUND, OPS).
+# The first entity is your primary one.
+#
+# Examples for different users:
+#   VC GP:        ("FUND:Acme Capital:VC fund" "INFRA:Acme Infra:Infra PE fund" "OPS:NewCo:Portfolio opco")
+#   Crypto trader: ("TRADE:Alpha Trading:Main trading" "RES:DeFi Research:Research arm")
+#   Founder:       ("CO:My Startup:Main company" "SIDE:Side Project:Weekend project")
+
+ENTITIES=(
+  "ENT1:Entity One:Primary org (e.g., your VC fund)"
+  "ENT2:Entity Two:Secondary org (e.g., your operating company)"
+  "ENT3:Entity Three:Tertiary org (e.g., your infra PE fund)"
+)
+
+# ─── Agents ─────────────────────────────────────────────
+# Which slock-style president agents to scaffold under ~/.claude/agents/.
+# Each name maps to a template in claude/agents/examples/<name>/.
+# Available templates:
+#   fund-president     — VC/PE fund head (deal flow, IC, LP relations)
+#   infra-president    — Infra PE fund head (project deals, capacity sizing)
+#   ops-president      — Portfolio opco head (logistics, ops, finance)
+#   ship-cto           — Engineering orchestrator (internal tools, dashboards)
+#   capital-president  — Capital formation / LP / fundraising
+#   generalist         — Daily ops generalist (calendar, email, inbox)
+#   design-lead        — Brand & visual design
+#   legal-counsel      — Contracts, structure, compliance
+
+AGENTS=(
+  "fund-president"
+  "ops-president"
+  "ship-cto"
+  "generalist"
+)
+
+# ─── MCP Servers ────────────────────────────────────────
+# MCP servers extend Claude Code with external tools.
+# Listed servers get a config snippet printed at the end of setup —
+# you paste it into ~/.claude.json yourself (we never auto-write secrets).
+#
+# Available pointers:
+#   memory          — Local BM25 memory + Brain search (jerryshimax/mcp-memory)
+#   google-tasks    — Google Tasks integration (jerryshimax/mcp-google-tasks)
+#   superhuman      — Superhuman email (Anthropic Connectors)
+#   gmail           — Gmail (Anthropic Connectors)
+#   gcal            — Google Calendar (Anthropic Connectors)
+#   gdrive          — Google Drive (Anthropic Connectors)
+#   context7        — Library docs lookup (Upstash)
+#   playwright      — Browser automation (Microsoft)
+
+MCPS=(
+  "memory"
+  "google-tasks"
+)
+
+# ─── Optional Modules ───────────────────────────────────
+# These are pointer-docs in modules/ — none ship as source.
+# Set to true if you want setup.sh to print install instructions for them.
+
+ENABLE_CLOUD_BOT=false      # Telegram AI assistant (jerryshimax/cloud-bot)
+ENABLE_DOWNLOADS_FILER=false # Auto-filer for ~/Downloads (jerryshimax/downloads-filer)
+ENABLE_MAC_BOOTSTRAP=false  # Fresh-Mac provisioning (jerryshimax/mac-bootstrap)
+
+# ─── Logging ────────────────────────────────────────────
+ENABLE_LOG_ROTATE=true

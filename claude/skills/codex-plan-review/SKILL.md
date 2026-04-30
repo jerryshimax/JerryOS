@@ -42,7 +42,7 @@ Auth, authorization, RLS, input validation
 What I'm not sure about
 ```
 
-Present this plan to Jerry for quick alignment before sending to Codex.
+Present this plan to the user for quick alignment before sending to Codex.
 
 ### Step 2: Collect Supporting Context (3 layers)
 
@@ -50,7 +50,7 @@ Present this plan to Jerry for quick alignment before sending to Codex.
 
 **Layer 2 — Conversation Context:**
 - Extract the original request/requirements from the conversation
-- Any constraints Jerry mentioned (timeline, tech, integration points)
+- Any constraints the user mentioned (timeline, tech, integration points)
 - Decisions already made and why
 
 **Layer 3 — Key Files:**
@@ -81,11 +81,11 @@ Use `/codex:status` to check progress. Use `/codex:result` to retrieve findings.
 
 | Codex Verdict | Action |
 |---------------|--------|
-| PROCEED | Tell Jerry "Plan passed adversarial review" with any MEDIUM items noted |
-| REVISE | Present each CRITICAL/HIGH issue to Jerry: |
-| | - Issues Claude agrees with: propose the fix, apply if Jerry approves |
-| | - Issues Claude disagrees with: present both perspectives, let Jerry decide |
-| RETHINK | Full stop. Present Codex's argument for why the approach is fundamentally wrong. Claude adds its own assessment. Jerry decides: revise or proceed anyway. |
+| PROCEED | Tell the user "Plan passed adversarial review" with any MEDIUM items noted |
+| REVISE | Present each CRITICAL/HIGH issue to the user: |
+| | - Issues Claude agrees with: propose the fix, apply if the user approves |
+| | - Issues Claude disagrees with: present both perspectives, let the user decide |
+| RETHINK | Full stop. Present Codex's argument for why the approach is fundamentally wrong. Claude adds its own assessment. the user decides: revise or proceed anyway. |
 
 ### Step 5: Iterate (Max 3 Rounds)
 
@@ -93,7 +93,7 @@ If the plan was revised:
 1. Update the structured plan with fixes
 2. Send the revised plan back to Codex: "Here is the revised plan addressing your previous flags. Find new failure modes."
 3. Repeat until PROCEED or 3 rounds reached
-4. If still REVISE after 3 rounds: present remaining issues to Jerry, proceed with acknowledged risks
+4. If still REVISE after 3 rounds: present remaining issues to the user, proceed with acknowledged risks
 
 ### Step 6: Audit Trail (Optional)
 
@@ -122,7 +122,7 @@ For projects that warrant it:
 - **[Area]** — {failure scenario}. Note: {context}
 
 ### Claude vs Codex Disagreements
-| Issue | Claude's View | Codex's View | Jerry's Call Needed |
+| Issue | Claude's View | Codex's View | the user's Call Needed |
 |-------|--------------|--------------|---------------------|
 
 ### Plan Revisions Applied

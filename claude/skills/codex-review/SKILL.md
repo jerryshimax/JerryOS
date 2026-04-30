@@ -16,7 +16,7 @@ Cross-model code review gate. Claude collects context (diff, design intent, key 
 
 **Layer 1 — The Diff:**
 ```bash
-git diff HEAD~1          # or the range Jerry specifies
+git diff HEAD~1          # or the range the user specifies
 git diff --stat HEAD~1   # summary of what changed
 ```
 If $ARGUMENTS specifies a commit range, branch, or path — use that instead.
@@ -48,17 +48,17 @@ Parse Codex response and act:
 
 | Codex Verdict | Action |
 |---------------|--------|
-| PASS | Tell Jerry "Codex review passed" with any INFO items listed |
+| PASS | Tell the user "Codex review passed" with any INFO items listed |
 | CHANGES_REQUIRED | Split issues into mechanical vs design: |
-| | - **Mechanical** (typos, missing null checks, obvious bugs): fix them directly, show Jerry what you fixed |
-| | - **Design** (architecture disagreements, approach questions): present to Jerry for decision |
-| NEEDS_DISCUSSION | Present all judgment-call items to Jerry with both Claude's and Codex's perspectives |
+| | - **Mechanical** (typos, missing null checks, obvious bugs): fix them directly, show the user what you fixed |
+| | - **Design** (architecture disagreements, approach questions): present to the user for decision |
+| NEEDS_DISCUSSION | Present all judgment-call items to the user with both Claude's and Codex's perspectives |
 
 ### Step 4: Optional Re-Review
 
 If you made fixes in Step 3, offer: "Want me to send the fixes back to Codex for a second pass?"
 
-If Jerry says yes → collect the new diff and repeat Step 2-3. Max 3 rounds.
+If the user says yes → collect the new diff and repeat Step 2-3. Max 3 rounds.
 
 ### Step 5: Audit Trail (Optional)
 
