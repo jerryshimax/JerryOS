@@ -1,10 +1,12 @@
-# JerryOS v2
+# JerryOS v3
 
 A Claude Code operating system. Skills, hooks, slock-style agents, autoload rules, and an Obsidian knowledge vault — wired together so a single `claude` session knows your context, protects your files, and routes work to specialist agents.
 
 This is the OS layer Jerry Shi runs daily across multiple firms and projects, repackaged so anyone can clone, configure, and run it.
 
-## What v2 ships
+**v3 (2026-05-01)** adds [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — the always-on home server pattern Jerry uses to keep slock agents reachable while traveling. OS layer itself is unchanged from v2. See [CHANGELOG](CHANGELOG.md).
+
+## What v2/v3 ships
 
 - **62 skills** — Engineering (debug-hypothesis, simplify, harden, audit, codex-review), design (frontend-design, stitch-design-taste, minimalist-ui), VC/PE (deal-partner, ic-chair, dd-lead, lp-relations, syndicate, council, arena), and personal-OS (notecraft, retro, onboard).
 - **9 hooks** — `safety-gate`, `backup-before-edit`, `brain-guard`, `chat-privacy-hook`, `chat-tracker`, `claude-session-start`, `session-export`, `brain-index-refresh`, `log-hook-event`. All event types covered: PreToolUse, PostToolUse, SessionStart, SessionEnd, Stop.
@@ -96,6 +98,13 @@ See [docs/SECURITY.md](docs/SECURITY.md).
 - Add an MCP → paste the snippet from setup output into `~/.claude.json`.
 
 See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md), [docs/AGENTS.md](docs/AGENTS.md), [docs/MCPS.md](docs/MCPS.md).
+
+## Deployment
+
+- **Default:** single laptop. `./setup.sh` and you're done.
+- **Always-on home server:** dedicated Mac hosts the slock daemon so agents reply while you travel. File-access bridges for Brain, `~/.claude/`, and `~/Downloads/` via GDrive + GitHub sync + rsync over Tailscale.
+
+Full guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Modules (separate repos)
 

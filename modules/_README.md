@@ -9,6 +9,7 @@ Wire them in after `setup.sh` finishes; each repo has its own install instructio
 | Module | What it is | Repo |
 |--------|------------|------|
 | `cloud-bot` | Telegram bot — message Claude from your phone, MCPs wired in | <https://github.com/jerryshimax/cloud-bot> |
+| `slock-daemon` | Slock.ai runtime — consumes the `claude/agents/` templates, exposes them via slock.ai web + iPhone. See [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md) for the always-on home server pattern. | `npx -y @slock-ai/daemon@latest` |
 | `cloud-mail` | Star-to-draft Gmail assistant | <https://github.com/jerryshimax/cloud-mail-public> |
 | `mcp-memory` | Local MCP server: BM25 search across Brain + memory + daily session logs | <https://github.com/jerryshimax/mcp-memory> |
 | `mcp-google-tasks` | Local MCP server: Google Tasks CRUD with calendar sync | <https://github.com/jerryshimax/mcp-google-tasks> |
