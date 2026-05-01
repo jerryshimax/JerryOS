@@ -1,5 +1,23 @@
 # Changelog
 
+## v3.0.1 — 2026-05-01
+
+Operational hardening from the M2 reliability audit. Doc-only — no code changes to JerryOS itself. Captures three additional LaunchAgents Jerry now runs on the always-on Mac, the bash pipe-shadow bug that bit his first repair script, and why a M2-side healthcheck is the wrong instinct.
+
+### Added
+- **DEPLOYMENT.md "Reliability hardening (unattended operation)"** — table of three audit-derived agents:
+  - `com.cloud.log-rotate` (M2, 03:00 daily) — rotate `~/Ship/logs/*.log` at 5 MB, keep 5. Logs hit 2 MB in a week without it.
+  - `com.cloud.m2-auto-update` (M2, 04:20 daily) — `git pull --ff-only` on cloud-bot + mac-bootstrap. Skips dirty trees, refuses to bump deps, kickstarts the daemon only when runtime files actually change.
+  - Heartbeat watchdog with SSH fallback (M5, 5 min) — before paging on a stale iCloud heartbeat, `ssh m2 'pgrep bun'`; if the bot is alive, the heartbeat is just iCloud-lagged, suppress the alert.
+- Pipe-shadow note: `if git pull | tail -3; then ...` reports success on every failure because `$?` reflects only `tail`. Use `--ff-only` or `set -o pipefail`.
+- Anti-pattern note: don't run a healthcheck LaunchAgent *on* M2 — it's redundant with the remote watchdog and the macOS notifications it fires are invisible when you're traveling.
+
+### Migration
+
+No-op. Existing v3.0.0 setups continue working. Pattern 2 users wanting the hardening: read the new subsection in `docs/DEPLOYMENT.md` and crib from `~/Ship/_audit/2026-05-01-m2-reliability/` (audit dir Jerry keeps locally).
+
+---
+
 ## v3.0.0 — 2026-05-01
 
 Adds the **always-on home server** deployment pattern. Operational, not code — the OS layer itself is unchanged. New doc captures the M2 setup Jerry runs in production: slock daemon flipped from laptop to always-on Mac, Downloads bridged via rsync over Tailscale, two macOS gotchas worth knowing before you try this yourself.

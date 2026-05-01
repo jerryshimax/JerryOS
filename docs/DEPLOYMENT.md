@@ -87,6 +87,22 @@ Trade-off: agents need to know the alternate path. Append a one-line infrastruct
 | api.slock.ai outage | All agents silent. Daemon backs off and retries. | Wait. |
 | Split-brain (M5 daemon resurrected) | Both fight over the machine API key. | M5 plist must stay `.disabled-*`. |
 
+### Reliability hardening (unattended operation)
+
+For weeks-to-months without physical access, three more LaunchAgents matter beyond the daemon itself:
+
+| Agent | Where | Cadence | Purpose |
+|---|---|---|---|
+| `com.cloud.log-rotate` | M2 | 03:00 daily | Rotate `~/Ship/logs/*.log` at 5 MB, keep 5. Without it, watchdog/heartbeat/bot logs grow unbounded — Jerry's hit 2 MB in a week. |
+| `com.cloud.m2-auto-update` | M2 | 04:20 daily | `git pull` on cloud-bot + mac-bootstrap. Skip if dirty, `--ff-only`, refuse to restart bot on `package.json` changes. |
+| Heartbeat watchdog with SSH fallback | M5 | 5 min | Before paging on a stale iCloud heartbeat, `ssh m2 'pgrep bun'`. If the bot is alive, the heartbeat is just iCloud-lagged — don't alert. |
+
+The auto-updater is intentionally conservative: won't run if `git status` is dirty (your in-flight work is safe), refuses to bump deps automatically (a human runs `bun install`), and only kickstarts the daemon when files in its runtime path actually changed. Daily window 04:20–04:25 to avoid colliding with watchdog ticks at :00/:05/...
+
+**Pipe-shadow gotcha:** an early version of Jerry's M2-flip repair script ran `if git pull | tail -3; then ...` to show the pull's last few lines. Bash `$?` reflects only the last command in the pipe, so `tail` succeeding masked every `git pull` failure — M2 reported "ok" while sitting on stale code. Use `git pull --ff-only` without a pipe, or `set -o pipefail` before the pipe.
+
+**Don't run a healthcheck LaunchAgent on M2.** A local `pgrep` + `osascript` notification is redundant with the M5 watchdog and useless when you're traveling — you can't see macOS notifications from a different country. The watchdog detects + kickstarts + alerts via Telegram; the local healthcheck only adds log noise.
+
 ### Reference scripts
 
 Step-by-step playbook for the M5→M2 flip lives in iCloud at `~/Library/Mobile Documents/com~apple~CloudDocs/Cloud/`:
