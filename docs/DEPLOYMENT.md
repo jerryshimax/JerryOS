@@ -89,15 +89,16 @@ Trade-off: agents need to know the alternate path. Append a one-line infrastruct
 
 ### Reliability hardening (unattended operation)
 
-For weeks-to-months without physical access, three more LaunchAgents matter beyond the daemon itself:
+For weeks-to-months without physical access, four more LaunchAgents matter beyond the daemon itself:
 
 | Agent | Where | Cadence | Purpose |
 |---|---|---|---|
 | `com.cloud.log-rotate` | M2 | 03:00 daily | Rotate `~/Ship/logs/*.log` at 5 MB, keep 5. Without it, watchdog/heartbeat/bot logs grow unbounded — Jerry's hit 2 MB in a week. |
 | `com.cloud.m2-auto-update` | M2 | 04:20 daily | `git pull` on cloud-bot + mac-bootstrap. Skip if dirty, `--ff-only`, refuse to restart bot on `package.json` changes. |
+| `com.jerry.slock-daemon-update` | M2 | 04:30 daily | Bootout slock daemon, nuke `~/.npm/_npx`, bootstrap. Forces `npx -y @slock-ai/daemon@latest` to re-resolve so new daemon releases actually land. Without it the daemon stays pinned to whatever `npx` cached at first launch — Jerry's UI surfaced an "outdated daemon" banner after the v0.42.0 → v0.43+ release because nothing was forcing a refresh. |
 | Heartbeat watchdog with SSH fallback | M5 | 5 min | Before paging on a stale iCloud heartbeat, `ssh m2 'pgrep bun'`. If the bot is alive, the heartbeat is just iCloud-lagged — don't alert. |
 
-The auto-updater is intentionally conservative: won't run if `git status` is dirty (your in-flight work is safe), refuses to bump deps automatically (a human runs `bun install`), and only kickstarts the daemon when files in its runtime path actually changed. Daily window 04:20–04:25 to avoid colliding with watchdog ticks at :00/:05/...
+The auto-updaters are intentionally conservative: cloud-bot won't pull if `git status` is dirty (your in-flight work is safe), refuses to bump deps automatically (a human runs `bun install`), and only kickstarts the daemon when files in its runtime path actually changed. The slock refresh runs even if no new version exists — a 30-second restart with WebSocket reconnect is cheaper than a version-check API call. Daily windows are staggered (04:20 / 04:25 / 04:30) to avoid colliding with watchdog ticks at :00/:05/...
 
 **Pipe-shadow gotcha:** an early version of Jerry's M2-flip repair script ran `if git pull | tail -3; then ...` to show the pull's last few lines. Bash `$?` reflects only the last command in the pipe, so `tail` succeeding masked every `git pull` failure — M2 reported "ok" while sitting on stale code. Use `git pull --ff-only` without a pipe, or `set -o pipefail` before the pipe.
 

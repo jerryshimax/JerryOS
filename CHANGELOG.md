@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.0.2 — 2026-05-01
+
+Adds the slock-daemon-update LaunchAgent to the v3.0.1 hardening table after Jerry's first daemon-version-pinning incident the same day.
+
+### Added
+- DEPLOYMENT.md row for `com.jerry.slock-daemon-update` (M2, 04:30 daily): bootout daemon, clear `~/.npm/_npx`, bootstrap. Forces `npx -y @slock-ai/daemon@latest` to actually re-resolve. Slock UI started showing "outdated daemon" banners because the npx cache pinned the resolved version on first launch and nothing was clearing it.
+
+### Why this needed its own agent
+Slock daemon plist uses KeepAlive=true with no time-based trigger. `npx @latest` resolves once at boot and the cached version sticks until something forces npx to re-resolve. A scheduled bootout/cache-clear/bootstrap is the cheapest way; coupling it to `m2-auto-update` was rejected because that script can short-circuit on dirty git trees and silently skip the slock refresh.
+
+---
+
 ## v3.0.1 — 2026-05-01
 
 Operational hardening from the M2 reliability audit. Doc-only — no code changes to JerryOS itself. Captures three additional LaunchAgents Jerry now runs on the always-on Mac, the bash pipe-shadow bug that bit his first repair script, and why a M2-side healthcheck is the wrong instinct.
