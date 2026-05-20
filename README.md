@@ -4,7 +4,9 @@ A Claude Code operating system. Skills, hooks, slock-style agents, autoload rule
 
 This is the OS layer Jerry Shi runs daily across multiple firms and projects, repackaged so anyone can clone, configure, and run it.
 
-**v3 (2026-05-01)** adds [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — the always-on home server pattern Jerry uses to keep slock agents reachable while traveling. OS layer itself is unchanged from v2. See [CHANGELOG](CHANGELOG.md).
+**v3.1 (2026-05-20)** ports the Brain Architecture v2 rules into `brain-naming.md` — Living vs. Snapshot vs. Sent file categorization, pre-creation duplicate gate, and supersede + archive flow. Also closes a `.gitignore` gap that allowed dataroom-style folders to be staged for commit. See [CHANGELOG](CHANGELOG.md).
+
+**v3 (2026-05-01)** adds [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — the always-on home server pattern Jerry uses to keep slock agents reachable while traveling.
 
 ## What v2/v3 ships
 

@@ -59,3 +59,37 @@ TG_CHATS.md
 .chat-rules.json
 .brain-index-queue
 .active-chat
+
+# Private Brain content — only README / Templates / Indexes structure ships.
+# Anything matching the [Type] Entity - Description naming convention is real
+# user content and must never reach the public repo.
+brain/[[]Meetings[]]*
+brain/[[]Memos[]]*
+brain/[[]People[]]*
+brain/[[]Decks[]]*
+brain/[[]Research[]]*
+brain/[[]Legal[]]*
+brain/[[]Datarooms[]]*
+brain/[[]Medical[]]*
+brain/[[]Wellness[]]*
+brain/[[]Home[]]*
+brain/[[]Finance[]]*
+brain/[[]Travel[]]*
+brain/[[]Documents[]]*
+brain/[[]Events[]]*
+brain/[[]Inbox[]]*
+brain/[[]Ship[]]*
+brain/[[]Design[]]*
+
+# Datarooms / deal materials — never ship anywhere
+dataroom/
+datarooms/
+deals/
+**/IC_Memo_*
+**/*_Financials*.xls*
+**/*_Financials*.xlsm
+
+# Personal memory contents (only the template structure is shareable)
+claude/memory/projects/
+claude/memory/sessions/
+claude/memory/handoffs/

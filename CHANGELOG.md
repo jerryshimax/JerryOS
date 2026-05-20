@@ -1,5 +1,33 @@
 # Changelog
 
+## v3.1.0 — 2026-05-20
+
+Ports the **Brain Architecture v2** rules into the public template, and closes a `.gitignore` gap that allowed deal-stage folders (`dataroom/`, raw `[Meetings]`/`[Memos]`/`[People]` files) to be staged for commit. The Brain rules are the substantive change — they encode the file-clutter discipline Jerry has been running for the past quarter.
+
+### Added — Brain Architecture v2 (in `claude/rules/brain-naming.md`)
+
+- **Living vs. Snapshot vs. Sent — pick before naming.** The single rule that prevents Brain bloat. Every file is one of three categories; dates and `_superseded/` flow follow from the category. Default-to-living-doc when in doubt — adding a date "just in case" is the #1 cause of duplicate files.
+- **Pre-creation duplicate gate.** Before creating any `[Ship]`/`[Memos]`/`[Research]` file, fuzzy-match the last 14 days for same `[Type]` + same entity + overlapping keywords. Default to UPDATING the existing file unless audience/purpose actually differs.
+- **Supersede + archive flow.** Explicit four-step procedure: `supersedes:` / `superseded_by:` frontmatter, move to `_superseded/`, Activity Log entry. Never delete superseded files — they're version history.
+- **Non-English content rule.** Description in source language, tags/entity/date stay in English. Plus a new example row.
+- **Expanded `[Inbox]` definition.** Captures the "Apple Notes → paste into Claude Code → promote → delete" loop.
+
+### Added — Safety hardening (in `.gitignore`)
+
+- All `brain/[Type] *` patterns now ignored (`[Meetings]`, `[Memos]`, `[People]`, `[Decks]`, `[Research]`, `[Legal]`, `[Datarooms]`, `[Medical]`, `[Wellness]`, `[Home]`, `[Finance]`, `[Travel]`, `[Documents]`, `[Events]`, `[Inbox]`, `[Ship]`, `[Design]`). The vault root holds real-content files matching this pattern; only the templates / dashboards / indexes should be tracked.
+- `dataroom/`, `datarooms/`, `deals/`, `**/IC_Memo_*`, `**/*_Financials*.xls*` — never ship deal materials, ever.
+- `claude/memory/projects/`, `claude/memory/sessions/`, `claude/memory/handoffs/` — personal memory state stays local.
+
+### Why this needed its own release
+
+The previous `.gitignore` covered secrets and crypto material but assumed nobody would ever stage a `dataroom/` folder inside the repo working tree. The failure mode hit in practice: a deal dataroom (IC memo, financials, civil drawings) was sitting untracked in the working tree where `git add .` would have committed it to a public repo. A pattern-based ignore for `brain/[Type] *` is the simplest fix — anything matching the Brain naming convention is by definition private content.
+
+### Migration
+
+No-op for existing installs. v3.0.x users can `git pull` to get the safer `.gitignore` and the updated `brain-naming.md` template. The new Brain Architecture v2 rules require no Brain re-layout — they describe the file-naming discipline you should follow going forward.
+
+---
+
 ## v3.0.2 — 2026-05-01
 
 Adds the slock-daemon-update LaunchAgent to the v3.0.1 hardening table after Jerry's first daemon-version-pinning incident the same day.
